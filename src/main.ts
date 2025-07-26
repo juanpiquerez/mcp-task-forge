@@ -100,7 +100,7 @@ server.registerTool(
 server.registerTool(
   "update_ticket",
   {
-    description: "Updates an existing ticket by ID. You can update title, description, or execution plan.",
+    description: "Updates an existing ticket by ID. You can update title, description, execution plan, or status.",
     inputSchema: {
       id: z.string().describe("ID of the ticket"),
       title: z.string().optional().describe("New title"),
@@ -110,8 +110,26 @@ server.registerTool(
     },
     annotations: { destructiveHint: true }
   },
-  async ({ id, title, description, executionPlan }) => {
-    await updateTicket(id, { title, description, executionPlan });
+  async ({ id, title, description, executionPlan, status }) => {
+    // Only include fields that are defined
+    const updateData: Record<string, unknown> = {};
+    if (title !== undefined) updateData.title = title;
+    if (description !== undefined) updateData.description = description;
+    if (executionPlan !== undefined) updateData.executionPlan = executionPlan;
+    if (status !== undefined) updateData.status = status;
+
+    if (Object.keys(updateData).length === 0) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `No fields provided to update for ticket with ID ${id}.`,
+          },
+        ],
+      };
+    }
+
+    await updateTicket(id, updateData);
     return {
       content: [
         {
@@ -172,7 +190,7 @@ server.registerTool(
         description,
         executionPlan
         } = data.data;
-    const prompt = executeTaskPrompt(description, executionPlan);
+    const prompt = executeTaskPrompt(description, executionPlan, id);
 
     await runGeminiWithProcess( id, prompt);
     await updateTicket(id, { status: "running" });

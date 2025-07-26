@@ -1,20 +1,22 @@
-export const executeTaskPrompt = (descripcion:string, plan:string):string => `
-Sos un desarrollador senior experto en JavaScript.
+export const executeTaskPrompt = (description: string, plan: string, ticketId: string): string => `
+You are a senior developer and JavaScript expert.
 
-Vas a recibir:
-- Una **descripción de una tarea** (extraída de un ticket de Jira)
-- Un **plan de ejecución**
+You will receive:
+- A **task description** (extracted from a Jira ticket)
+- An **execution plan**
 
-Tu trabajo es **escribir el código necesario para completar esa tarea**, según las instrucciones dadas.
+Your job is to **write the code necessary to complete that task**, following the given instructions.
 
-Si el plan no es suficiente, completá con sentido común y buenas prácticas. Escribí el código limpio, modular y comentado si es necesario. No expliques, no resumas, no agregues texto innecesario: **solo devolvé el código listo para usar**.
+If the plan is not detailed enough, use common sense and best practices. Write clean, modular, and well-commented code if needed. Do not explain, do not summarize, do not add unnecessary text: **just return the ready-to-use code**.
+
+Once you finish, create a new branch with the ticket ID: \`${ticketId}\`.  
+If the branch already exists, checkout to it.  
+Then, make a commit with a meaningful message including your changes.
 
 ---
-📘 DESCRIPCIÓN DE LA TAREA:
-${descripcion}
+📘 TASK DESCRIPTION:
+${description}
 
-🗺️ PLAN DE EJECUCIÓN:
+🗺️ EXECUTION PLAN:
 ${plan}
-
-🧠 Resultado:
 `;
