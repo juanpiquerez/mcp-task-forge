@@ -9,6 +9,8 @@ import {
   updateTicket,
   deleteTicket,
 } from "./lib/firestoreService";
+import { runGeminiWithProcess } from "./utils/cli";
+import { executeTaskPrompt } from "./utils/promt";
 
 const server = new McpServer({
   name: "Ticket Server",
@@ -136,6 +138,46 @@ server.registerTool(
         {
           type: "text",
           text: `Ticket with ID ${id} deleted.`,
+        },
+      ],
+    };
+  }
+);
+
+server.registerTool(
+  "run_gemini",
+  {
+    description: "Runs the Gemini model with a given prompt.",
+    inputSchema: {
+      id: z.string().describe("Id of the task"),
+    //   prompt: z.string().describe("Prompt for the Gemini model"),
+    },
+  },
+  async ({ id }) => {
+    const data = await readTicket(id);
+    if (!data) {
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Ticket with ID ${id} not found.`,
+          },
+        ],
+      };
+    }
+    const {
+        title,
+        description,
+        executionPlan
+        } = data.data;
+    const prompt = executeTaskPrompt(description, executionPlan);
+
+    await runGeminiWithProcess( id, prompt);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Se ejecuto la tarea ${title}`,
         },
       ],
     };

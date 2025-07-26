@@ -59,3 +59,45 @@ export const updateTicket = async (id: string, ticket: Partial<Ticket>): Promise
 export const deleteTicket = async (id: string): Promise<void> => {
   await deleteDoc(doc(db, "tickets", id));
 };
+
+// --- PROCESS COLLECTION SCHEMA & SERVICES ---
+
+// Zod schema for a process (only id)
+export const ProcessSchema = z.object({
+  id: z.string(),
+});
+
+export type Process = z.infer<typeof ProcessSchema>;
+
+// Create process
+export const createProcess = async (id: string): Promise<void> => {
+  await setDoc(doc(db, "process", id), { id });
+};
+
+// Read a process by ID
+export const readProcess = async (id: string): Promise<{ id: string } | null> => {
+  const snapshot = await getDoc(doc(db, "process", id));
+  if (!snapshot.exists()) return null;
+  const data = snapshot.data();
+  const parsed = ProcessSchema.safeParse(data);
+  if (!parsed.success) return null;
+  return { id: snapshot.id };
+};
+
+// Read all processes
+export const readAllProcesses = async (): Promise<{ id: string }[]> => {
+  const querySnapshot = await getDocs(collection(db, "process"));
+  return querySnapshot.docs
+    .map(docSnap => {
+      const data = docSnap.data();
+      const parsed = ProcessSchema.safeParse(data);
+      if (!parsed.success) return null;
+      return { id: docSnap.id };
+    })
+    .filter((item): item is { id: string } => item !== null);
+};
+
+// Delete process
+export const deleteProcess = async (id: string): Promise<void> => {
+  await deleteDoc(doc(db, "process", id));
+};
