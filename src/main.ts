@@ -19,7 +19,7 @@ const server = new McpServer({
   version: "1.0.0",
 });
 
-// Crear ticket
+// Create ticket
 server.registerTool(
   "create_ticket",
   {
@@ -45,7 +45,7 @@ server.registerTool(
   }
 );
 
-// Leer todos los tickets
+// Get all tickets
 server.registerTool(
   "get_tickets",
   {
@@ -64,7 +64,7 @@ server.registerTool(
   }
 );
 
-// Leer un ticket por ID
+// Get a ticket by ID
 server.registerTool(
   "get_ticket",
   {
@@ -96,7 +96,7 @@ server.registerTool(
   }
 );
 
-// Actualizar ticket
+// Update ticket
 server.registerTool(
   "update_ticket",
   {
@@ -141,7 +141,7 @@ server.registerTool(
   }
 );
 
-// Eliminar ticket
+// Delete ticket
 server.registerTool(
   "delete_ticket",
   {
@@ -164,13 +164,13 @@ server.registerTool(
   }
 );
 
+// Run Gemini process for a ticket
 server.registerTool(
   "run_gemini",
   {
-    description: "Runs the Gemini model with a given prompt.",
+    description: "Runs the Gemini model with a given prompt for a ticket.",
     inputSchema: {
-      id: z.string().describe("Id of the task"),
-    //   prompt: z.string().describe("Prompt for the Gemini model"),
+      id: z.string().describe("ID of the ticket"),
     },
   },
   async ({ id }) => {
@@ -186,31 +186,32 @@ server.registerTool(
       };
     }
     const {
-        title,
-        description,
-        executionPlan
-        } = data.data;
+      title,
+      description,
+      executionPlan
+    } = data.data;
     const prompt = executeTaskPrompt(description, executionPlan, id);
 
-    await runGeminiWithProcess( id, prompt);
+    await runGeminiWithProcess(id, prompt);
     await updateTicket(id, { status: "running" });
     return {
       content: [
         {
           type: "text",
-          text: `Se ejecuto la tarea ${title}`,
+          text: `Task ${title} has been executed.`,
         },
       ],
     };
   }
 );
 
+// Monitor Gemini process
 server.registerTool(
   "monitor_process",
   {
-    description: "Runs the Gemini model with a given prompt.",
+    description: "Monitors the Gemini process for a given ticket.",
     inputSchema: {
-      id: z.string().describe("Id of the task"),
+      id: z.string().describe("ID of the ticket"),
     },
   },
   async ({ id }) => {
