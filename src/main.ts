@@ -168,7 +168,7 @@ server.registerTool(
 server.registerTool(
   "run_gemini",
   {
-    description: "Runs the Gemini model with a given prompt for a ticket.",
+    description: "Runs the Gemini model with a given prompt for a ticket. This execute a task.",
     inputSchema: {
       id: z.string().describe("ID of the ticket"),
     },
@@ -209,7 +209,7 @@ server.registerTool(
 server.registerTool(
   "monitor_process",
   {
-    description: "Monitors the Gemini process for a given ticket.",
+    description: "Monitors the Gemini process for a given ticket. Gets logs, status and output.",
     inputSchema: {
       id: z.string().describe("ID of the ticket"),
     },
