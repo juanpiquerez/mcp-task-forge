@@ -8,7 +8,6 @@ import {
   readTicket,
   updateTicket,
   deleteTicket,
-  readProcess,
 } from "./lib/firestoreService";
 import { runGeminiWithProcess } from "./utils/cli";
 import { executeTaskPrompt } from "./utils/promt";
@@ -34,7 +33,7 @@ server.registerTool(
   async ({ title, description, executionPlan }) => {
     const id = Math.random().toString(36).slice(2); // Simple ID generator
     const createdAt = new Date().toISOString();
-    await createTicket(id, { title, description, executionPlan, createdAt });
+    await createTicket(id, { title, description, executionPlan, createdAt, status: "pending" });
     return {
       content: [
         {
@@ -107,6 +106,7 @@ server.registerTool(
       title: z.string().optional().describe("New title"),
       description: z.string().optional().describe("New description"),
       executionPlan: z.string().optional().describe("New execution plan"),
+      status: z.enum(["pending", "running", "completed", "failed"]).optional().describe("New status")
     },
     annotations: { destructiveHint: true }
   },
@@ -175,6 +175,7 @@ server.registerTool(
     const prompt = executeTaskPrompt(description, executionPlan);
 
     await runGeminiWithProcess( id, prompt);
+    await updateTicket(id, { status: "running" });
     return {
       content: [
         {

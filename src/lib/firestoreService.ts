@@ -16,6 +16,7 @@ export const TicketSchema = z.object({
   title: z.string(),
   description: z.string(),
   executionPlan: z.string(),
+  status: z.enum(["pending", "running", "completed", "failed"]).default("pending"),
   createdAt: z.string(),
 });
 
