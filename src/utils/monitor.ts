@@ -2,6 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { getDoc, doc } from "firebase/firestore";
 import { db } from "../lib/firebase";
+import { execSync } from "child_process";
 
 /**
  * Monitors a process by its ID stored in Firestore under the "process" collection.
@@ -36,7 +37,13 @@ export async function monitorProcess(taskId: string): Promise<string> {
     return `The process ${pid} is running, but its output file is missing.`;
   }
 
-  let output = fs.readFileSync(outputFilePath, "utf-8");
+  // Use 'cat' to read the file content
+  let output: string;
+  try {
+    output = execSync(`cat "${outputFilePath}"`).toString();
+  } catch (e) {
+    output = "";
+  }
 
   // Check if the process is running
   try {
