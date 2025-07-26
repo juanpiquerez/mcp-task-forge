@@ -8,9 +8,11 @@ import {
   readTicket,
   updateTicket,
   deleteTicket,
+  readProcess,
 } from "./lib/firestoreService";
 import { runGeminiWithProcess } from "./utils/cli";
 import { executeTaskPrompt } from "./utils/promt";
+import { monitorProcess } from "./utils/monitor";
 
 const server = new McpServer({
   name: "Ticket Server",
@@ -178,6 +180,27 @@ server.registerTool(
         {
           type: "text",
           text: `Se ejecuto la tarea ${title}`,
+        },
+      ],
+    };
+  }
+);
+
+server.registerTool(
+  "monitor_process",
+  {
+    description: "Runs the Gemini model with a given prompt.",
+    inputSchema: {
+      id: z.string().describe("Id of the task"),
+    },
+  },
+  async ({ id }) => {
+    const data = await monitorProcess(id);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${data}`,
         },
       ],
     };

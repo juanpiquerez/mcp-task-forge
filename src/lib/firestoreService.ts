@@ -65,6 +65,7 @@ export const deleteTicket = async (id: string): Promise<void> => {
 // Zod schema for a process (only id)
 export const ProcessSchema = z.object({
   id: z.string(),
+  pid: z.number()
 });
 
 export type Process = z.infer<typeof ProcessSchema>;
@@ -75,26 +76,26 @@ export const createProcess = async (id: string): Promise<void> => {
 };
 
 // Read a process by ID
-export const readProcess = async (id: string): Promise<{ id: string } | null> => {
+export const readProcess = async (id: string): Promise<{ id: string; pid: number } | null> => {
   const snapshot = await getDoc(doc(db, "process", id));
   if (!snapshot.exists()) return null;
   const data = snapshot.data();
   const parsed = ProcessSchema.safeParse(data);
   if (!parsed.success) return null;
-  return { id: snapshot.id };
+  return { id: snapshot.id, pid: parsed.data.pid };
 };
 
 // Read all processes
-export const readAllProcesses = async (): Promise<{ id: string }[]> => {
+export const readAllProcesses = async (): Promise<{ id: string; pid: number }[]> => {
   const querySnapshot = await getDocs(collection(db, "process"));
   return querySnapshot.docs
     .map(docSnap => {
       const data = docSnap.data();
       const parsed = ProcessSchema.safeParse(data);
       if (!parsed.success) return null;
-      return { id: docSnap.id };
+      return { id: docSnap.id, pid: parsed.data.pid };
     })
-    .filter((item): item is { id: string } => item !== null);
+    .filter((item): item is { id: string; pid: number } => item !== null);
 };
 
 // Delete process
