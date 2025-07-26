@@ -1,6 +1,4 @@
 export const executeTaskPrompt = (description: string, plan: string, ticketId: string): string => `
-You are a senior developer and JavaScript expert.
-
 You will receive:
 - A **task description** (extracted from a Jira ticket)
 - An **execution plan**
